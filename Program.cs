@@ -210,9 +210,7 @@ namespace PandaButcher_2
                             wait.Until(webDriver => driver.FindElement(By.CssSelector("input")).Displayed);
                             Thread.Sleep(100);
                             driver.FindElement(By.Name("email")).SendKeys(account.email + OpenQA.Selenium.Keys.Enter);
-                            Thread.Sleep(300);
-                            wait.Until(webDriver => driver.FindElement(By.CssSelector("input")).Displayed);
-                            Thread.Sleep(500);
+                            Thread.Sleep(1000);
                             if (selection.Equals("1"))
                             {
                                 account.rand();
@@ -227,7 +225,10 @@ namespace PandaButcher_2
                                     Thread.Sleep(100);
                                     driver.FindElement(By.Name("password")).SendKeys(OpenQA.Selenium.Keys.Enter);
                                     Thread.Sleep(3000);
-                                    wait.Until(webDriver => driver.FindElement(By.CssSelector("h1")).Displayed);
+                                    if (driver.Url != "https://www.foodpanda.ph/")
+                                    {
+                                        throw new WebDriverTimeoutException("Network Failure,Website failed to respond.");
+                                    }
                                     StreamWriter file = new StreamWriter(TimeStamp + "-GenAcc.txt", append: true);
                                     count++;
                                     file.WriteLine(account.ToString());
@@ -247,6 +248,11 @@ namespace PandaButcher_2
                                     Console.WriteLine("Account already existed");
                                     Console.ResetColor();
                                 }
+                                catch (StaleElementReferenceException serf)
+                                {
+                                    err_count++;
+                                    Trace.TraceWarning("FATAL ERROR {0} , Time - {1} At line - {2}", serf.Message, TimeStamp, i);
+                                }
                             }
                             else if (selection.Equals("2"))
                             {
@@ -257,6 +263,10 @@ namespace PandaButcher_2
                                 Thread.Sleep(3000);
                                 try
                                 {
+                                    if (driver.Url != "https://www.foodpanda.ph/")
+                                    {
+                                        throw new WebDriverTimeoutException("Network Failure,Website failed to respond.");
+                                    }
                                     driver.Navigate().GoToUrl("https://www.foodpanda.ph/vouchers");
                                     Thread.Sleep(1000);
                                     IList<IWebElement> elements = driver.FindElements(By.XPath("//ul"));
@@ -302,6 +312,11 @@ namespace PandaButcher_2
                                     Console.WriteLine("Account login failed");
                                     Console.ResetColor();
                                 }
+                                catch (StaleElementReferenceException serf)
+                                {
+                                    err_count++;
+                                    Trace.TraceWarning("FATAL ERROR {0} , Time - {1} At line - {2}", serf.Message, TimeStamp, i);
+                                }
                             }
 
                         }
@@ -318,6 +333,11 @@ namespace PandaButcher_2
                             Console.WriteLine("Account login failed");
                             Console.ResetColor();
 
+                        }
+                        catch (StaleElementReferenceException serf) 
+                        {
+                            err_count++;
+                            Trace.TraceWarning("FATAL ERROR {0} , Time - {1} At line - {2}", serf.Message, TimeStamp, i);
                         }
                         finally
                         {
