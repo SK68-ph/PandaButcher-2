@@ -209,8 +209,10 @@ namespace PandaButcher_2
                             Thread.Sleep(100);
                             wait.Until(webDriver => driver.FindElement(By.CssSelector("input")).Displayed);
                             Thread.Sleep(100);
+                            _ = driver.Manage().Timeouts().ImplicitWait;
                             driver.FindElement(By.Name("email")).SendKeys(account.email + OpenQA.Selenium.Keys.Enter);
                             Thread.Sleep(1000);
+                            _ = driver.Manage().Timeouts().ImplicitWait;
                             if (selection.Equals("1"))
                             {
                                 account.rand();
@@ -219,12 +221,16 @@ namespace PandaButcher_2
                                 {
                                     driver.FindElement(By.Name("first_name")).SendKeys(account.fname);
                                     Thread.Sleep(100);
+                                    _ = driver.Manage().Timeouts().ImplicitWait;
                                     driver.FindElement(By.Name("last_name")).SendKeys(account.lname);
                                     Thread.Sleep(100);
+                                    _ = driver.Manage().Timeouts().ImplicitWait;
                                     driver.FindElement(By.Name("password")).SendKeys(account.pass);
                                     Thread.Sleep(100);
+                                    _ = driver.Manage().Timeouts().ImplicitWait;
                                     driver.FindElement(By.Name("password")).SendKeys(OpenQA.Selenium.Keys.Enter);
-                                    Thread.Sleep(3000);
+                                    Thread.Sleep(2000);
+                                    _ = driver.Manage().Timeouts().ImplicitWait;
                                     if (driver.Url != "https://www.foodpanda.ph/")
                                     {
                                         throw new WebDriverTimeoutException("Network Failure,Website failed to respond.");
@@ -253,14 +259,21 @@ namespace PandaButcher_2
                                     err_count++;
                                     Trace.TraceWarning("FATAL ERROR {0} , Time - {1} At line - {2}", serf.Message, TimeStamp, i);
                                 }
+                                catch (WebDriverException wde)
+                                {
+                                    err_count++;
+                                    Trace.TraceWarning("ERROR {0} Website did not respond, Time - {1} At line - {2}", wde.Message, TimeStamp, i);
+                                }
                             }
                             else if (selection.Equals("2"))
                             {
                                 Console.WriteLine("Checking account {0}", account.email);
                                 driver.FindElement(By.Name("_password")).SendKeys(account.pass);
                                 Thread.Sleep(100);
+                                _ = driver.Manage().Timeouts().ImplicitWait;
                                 driver.FindElement(By.Name("_password")).SendKeys(OpenQA.Selenium.Keys.Enter);
-                                Thread.Sleep(3000);
+                                Thread.Sleep(2000);
+                                _ = driver.Manage().Timeouts().ImplicitWait;
                                 try
                                 {
                                     if (driver.Url != "https://www.foodpanda.ph/")
@@ -269,6 +282,7 @@ namespace PandaButcher_2
                                     }
                                     driver.Navigate().GoToUrl("https://www.foodpanda.ph/vouchers");
                                     Thread.Sleep(1000);
+                                    _ = driver.Manage().Timeouts().ImplicitWait;
                                     IList<IWebElement> elements = driver.FindElements(By.XPath("//ul"));
                                     StreamWriter file = new StreamWriter(TimeStamp + "-CheckedAcc.txt", append: true);
                                     if (elements.Count >= 5)
@@ -317,6 +331,11 @@ namespace PandaButcher_2
                                     err_count++;
                                     Trace.TraceWarning("FATAL ERROR {0} , Time - {1} At line - {2}", serf.Message, TimeStamp, i);
                                 }
+                                catch (WebDriverException wde)
+                                {
+                                    err_count++;
+                                    Trace.TraceWarning("ERROR {0} Website did not respond, Time - {1} At line - {2}", wde.Message, TimeStamp, i);
+                                }
                             }
 
                         }
@@ -339,6 +358,11 @@ namespace PandaButcher_2
                             err_count++;
                             Trace.TraceWarning("FATAL ERROR {0} , Time - {1} At line - {2}", serf.Message, TimeStamp, i);
                         }
+                        catch (WebDriverException wde)
+                        {
+                            err_count++;
+                            Trace.TraceWarning("ERROR {0} Website did not respond, Time - {1} At line - {2}", wde.Message, TimeStamp, i);
+                        }
                         finally
                         {
                             stopWatch.Stop();
@@ -350,6 +374,10 @@ namespace PandaButcher_2
                         }
                     }
                 }
+                var psi = new ProcessStartInfo("shutdown", "/s /t 0");
+                psi.CreateNoWindow = true;
+                psi.UseShellExecute = false;
+                Process.Start(psi);
                 Console.WriteLine("Done. Total process = {0}, Total warning = {1}, Total Errors = {2}", count, warn_count, err_count);
                 Console.ReadKey();
             }
