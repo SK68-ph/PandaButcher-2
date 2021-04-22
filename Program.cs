@@ -17,23 +17,23 @@ namespace PandaButcher_2
 {
     class Program
     {
+
+        // Instantiate random number generator.  
+        static private readonly Random _random = new Random();
+
+        // Generates a random number within a range.      
+        static private int RandomNumber(int min, int max)
+        {
+            return _random.Next(min, max);
+        }
         class Account
         {
-            // Instantiate random number generator.  
-            private readonly Random _random = new Random();
-
-            // Generates a random number within a range.      
-            private int RandomNumber(int min, int max)
-            {
-                return _random.Next(min, max);
-            }
-
             public void rand()
             {
                 string[] fnames = { "Angel", "John", "Paul", "Angelica", "Christian", "Nicole", "Justine", "Angela", "John", "Mark", "Mary", "Joy", "John", "Lloyd", "Mariel", "Jerome", "Jasmine", "Adrian", "Mary", "Grace", "John", "Michael", "Kimberly", "Angelo", "Stephanie", "Justin", "Christine", "John", "Carlo", "Michelle", "James", "Jessa", "Mae", "Mark", "Jenny", "Kenneth", "Angeline", "Jayson", "Erica", "Mark", "Anthony", "Marvin", "Martin", "Bea", "Daniel", "Janelle", "John", "Rey", "Kyla", "Ryan" };
                 string[] lnames = { "Valencia", "Reyes", "Cruz", "Bautista", "Del Rosario", "Gonzales", "Ramos", "Aquino", "García", "Dela Cruz", "Soledad", "Perez", "Calague", "Mendoza", "Fernandez" };
-                fname = fnames[RandomNumber(0, fnames.Length)];
-                lname = lnames[RandomNumber(0, lnames.Length)];
+                fname = fnames[RandomNumber(0, fnames.Length - 1)];
+                lname = lnames[RandomNumber(0, lnames.Length - 1)];
                 pass = RandomNumber(233764, 203982320).ToString();
             }
 
@@ -76,6 +76,11 @@ namespace PandaButcher_2
 
         static class Data
         {
+            private static string[] useragent = { "Mozilla / 5.0(Windows NT 10.0; Win64; x64) AppleWebKit / 537.36(KHTML, like Gecko) Chrome / 90.0.4430.85 Safari / 537.36", "Mozilla / 5.0(Windows NT 10.0; WOW64) AppleWebKit / 537.36(KHTML, like Gecko) Chrome / 90.0.4430.85 Safari / 537.36", "Mozilla / 5.0(Windows NT 10.0) AppleWebKit / 537.36(KHTML, like Gecko) Chrome / 90.0.4430.85 Safari / 537.36", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4363.0 Safari/537.36", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36 FS", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36" };
+            public static string GetUserAgent()
+            {
+                return useragent[RandomNumber(0,useragent.Length - 1)];
+            }
             public static string GetDataFile()
             {
                 string dataFile = "";
@@ -156,9 +161,6 @@ namespace PandaButcher_2
                
                 Account account = new Account();
                 Stopwatch stopWatch = new Stopwatch();
-                ChromeOptions options = new ChromeOptions();
-                options.AddUserProfilePreference("profile.default_content_setting_values.images", 2);
-                options.AddArguments("--guest", "--headless", "--user-agent=Mozilla/5.0 (Windows Phone 10.0; Android 4.2.1; Microsoft; Lumia 640 XL LTE)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Mobile Safari/537.36 Edge/12.10166", "--disable-blink-features=AutomationControlled", "--blink-settings=imagesEnabled=false", "--disable-gpu", "--disable-software-rasterizer", "--disable-extensions", "--log-level=3");
                 
                 int count = 0;
                 int err_count = 0;
@@ -172,6 +174,7 @@ namespace PandaButcher_2
                     {
                         continue;
                     }
+
                     if (data.Contains('#') || selection.Equals("3"))
                     {
                         if (data.Contains("OK"))
@@ -193,7 +196,10 @@ namespace PandaButcher_2
                     {
                         account.SplitRaw(data);
                     }
-                    
+                    ChromeOptions options = new ChromeOptions();
+                    options.AddUserProfilePreference("profile.default_content_setting_values.images", 2);
+                    options.AddArguments("--guest", "--user-agent=" + Data.GetUserAgent(), "--disable-blink-features=AutomationControlled", "--blink-settings=imagesEnabled=false", "--disable-gpu", "--disable-software-rasterizer", "--disable-extensions", "--log-level=3");
+
                     using (IWebDriver driver = new ChromeDriver(options))
                     {
                         WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
@@ -217,53 +223,27 @@ namespace PandaButcher_2
                             {
                                 account.rand();
                                 Console.WriteLine("Creating account - {0}", account.email);
-                                try
+                                driver.FindElement(By.Name("first_name")).SendKeys(account.fname);
+                                Thread.Sleep(100);
+                                _ = driver.Manage().Timeouts().ImplicitWait;
+                                driver.FindElement(By.Name("last_name")).SendKeys(account.lname);
+                                Thread.Sleep(100);
+                                _ = driver.Manage().Timeouts().ImplicitWait;
+                                driver.FindElement(By.Name("password")).SendKeys(account.pass);
+                                Thread.Sleep(100);
+                                _ = driver.Manage().Timeouts().ImplicitWait;
+                                driver.FindElement(By.Name("password")).SendKeys(OpenQA.Selenium.Keys.Enter);
+                                Thread.Sleep(2000);
+                                _ = driver.Manage().Timeouts().ImplicitWait;
+                                if (driver.Url != "https://www.foodpanda.ph/")
                                 {
-                                    driver.FindElement(By.Name("first_name")).SendKeys(account.fname);
-                                    Thread.Sleep(100);
-                                    _ = driver.Manage().Timeouts().ImplicitWait;
-                                    driver.FindElement(By.Name("last_name")).SendKeys(account.lname);
-                                    Thread.Sleep(100);
-                                    _ = driver.Manage().Timeouts().ImplicitWait;
-                                    driver.FindElement(By.Name("password")).SendKeys(account.pass);
-                                    Thread.Sleep(100);
-                                    _ = driver.Manage().Timeouts().ImplicitWait;
-                                    driver.FindElement(By.Name("password")).SendKeys(OpenQA.Selenium.Keys.Enter);
-                                    Thread.Sleep(2000);
-                                    _ = driver.Manage().Timeouts().ImplicitWait;
-                                    if (driver.Url != "https://www.foodpanda.ph/")
-                                    {
-                                        throw new WebDriverTimeoutException("Network Failure,Website failed to respond.");
-                                    }
-                                    StreamWriter file = new StreamWriter(TimeStamp + "-GenAcc.txt", append: true);
-                                    count++;
-                                    file.WriteLine(account.ToString());
-                                    file.Close();
-                                    Console.WriteLine("Done");
+                                    throw new WebDriverTimeoutException("Network Failure,Website failed to respond.");
                                 }
-                                catch (WebDriverTimeoutException wdte)
-                                {
-                                    err_count++;
-                                    Trace.TraceWarning("ERROR {0} , Time - {1} At line - {2}", wdte.Message, TimeStamp, i);
-                                }
-                                catch (NoSuchElementException nse)
-                                {
-                                    warn_count++;
-                                    Trace.TraceError("Warning {0} At line - {1}, Time - {2}", nse.Message, i, TimeStamp);
-                                    Console.ForegroundColor = ConsoleColor.Red;
-                                    Console.WriteLine("Account already existed");
-                                    Console.ResetColor();
-                                }
-                                catch (StaleElementReferenceException serf)
-                                {
-                                    err_count++;
-                                    Trace.TraceWarning("FATAL ERROR {0} , Time - {1} At line - {2}", serf.Message, TimeStamp, i);
-                                }
-                                catch (WebDriverException wde)
-                                {
-                                    err_count++;
-                                    Trace.TraceWarning("ERROR {0} Website did not respond, Time - {1} At line - {2}", wde.Message, TimeStamp, i);
-                                }
+                                StreamWriter file = new StreamWriter(TimeStamp + "-GenAcc.txt", append: true);
+                                count++;
+                                file.WriteLine(account.ToString());
+                                file.Close();
+                                Console.WriteLine("Done");
                             }
                             else if (selection.Equals("2"))
                             {
@@ -274,80 +254,54 @@ namespace PandaButcher_2
                                 driver.FindElement(By.Name("_password")).SendKeys(OpenQA.Selenium.Keys.Enter);
                                 Thread.Sleep(2000);
                                 _ = driver.Manage().Timeouts().ImplicitWait;
-                                try
+                                if (driver.Url != "https://www.foodpanda.ph/")
                                 {
-                                    if (driver.Url != "https://www.foodpanda.ph/")
-                                    {
-                                        throw new WebDriverTimeoutException("Network Failure,Website failed to respond.");
-                                    }
-                                    driver.Navigate().GoToUrl("https://www.foodpanda.ph/vouchers");
-                                    Thread.Sleep(1000);
-                                    _ = driver.Manage().Timeouts().ImplicitWait;
-                                    IList<IWebElement> elements = driver.FindElements(By.XPath("//ul"));
-                                    StreamWriter file = new StreamWriter(TimeStamp + "-CheckedAcc.txt", append: true);
-                                    if (elements.Count >= 5)
-                                    {
-                                        count++;
-                                        file.WriteLine("#Status - " + "OK");
-                                        file.WriteLine(account.ToString());
-                                        Console.ForegroundColor = ConsoleColor.Green;
-                                        Console.WriteLine("Done - Status = " + " OK");
-                                        Console.ResetColor();
-                                    }
-                                    else if (elements.Count == 4)
-                                    {
-
-                                        count++;
-                                        file.WriteLine("#Status - " + "NULL");
-                                        file.WriteLine(account.ToString());
-                                        Console.ForegroundColor = ConsoleColor.Red;
-                                        Console.WriteLine("Done - Status = " + "NULL");
-                                        Console.ResetColor();
-                                    }
-                                    else
-                                    {
-                                        warn_count++;
-                                        Console.ForegroundColor = ConsoleColor.Red;
-                                        Trace.TraceError("Warning Account login failed At line - {0}, Time - {1}", i, TimeStamp);
-                                        Console.ResetColor();
-                                    }
-                                    file.Close();
+                                    throw new WebDriverTimeoutException("Network Failure,Website failed to respond.");
                                 }
-                                catch (WebDriverTimeoutException wdte)
+                                driver.Navigate().GoToUrl("https://www.foodpanda.ph/vouchers");
+                                Thread.Sleep(1000);
+                                _ = driver.Manage().Timeouts().ImplicitWait;
+                                IList<IWebElement> elements = driver.FindElements(By.XPath("//ul"));
+                                StreamWriter file = new StreamWriter(TimeStamp + "-CheckedAcc.txt", append: true);
+                                if (elements.Count >= 5)
                                 {
-                                    err_count++;
-                                    Trace.TraceWarning("ERROR {0} , Time - {1} At line - {2}", wdte.Message, TimeStamp, i);
-                                }
-                                catch (NoSuchElementException nse)
-                                {
-                                    warn_count++;
-                                    Trace.TraceError("Warning {0} At line - {1}, Time - {2}", nse.Message, i, TimeStamp);
-                                    Console.ForegroundColor = ConsoleColor.Red;
-                                    Console.WriteLine("Account login failed");
+                                    count++;
+                                    file.WriteLine("#Status - " + "OK");
+                                    file.WriteLine(account.ToString());
+                                    Console.ForegroundColor = ConsoleColor.Green;
+                                    Console.WriteLine("Done - Status = " + " OK");
                                     Console.ResetColor();
                                 }
-                                catch (StaleElementReferenceException serf)
+                                else if (elements.Count == 4)
                                 {
-                                    err_count++;
-                                    Trace.TraceWarning("FATAL ERROR {0} , Time - {1} At line - {2}", serf.Message, TimeStamp, i);
+
+                                    count++;
+                                    file.WriteLine("#Status - " + "NULL");
+                                    file.WriteLine(account.ToString());
+                                    Console.ForegroundColor = ConsoleColor.Red;
+                                    Console.WriteLine("Done - Status = " + "NULL");
+                                    Console.ResetColor();
                                 }
-                                catch (WebDriverException wde)
+                                else
                                 {
-                                    err_count++;
-                                    Trace.TraceWarning("ERROR {0} Website did not respond, Time - {1} At line - {2}", wde.Message, TimeStamp, i);
+                                    warn_count++;
+                                    Console.ForegroundColor = ConsoleColor.Red;
+                                    Trace.TraceError("Warning Account login failed At line - {0}, Time - {1}", i, TimeStamp);
+                                    Console.ResetColor();
                                 }
+                                file.Close();
                             }
 
                         }
                         catch (WebDriverTimeoutException wdte)
                         {
                             err_count++;
-                            Trace.TraceWarning("ERROR {0} , Time - {1} At line - {2}", wdte.Message, TimeStamp, i);
+                            Trace.TraceWarning("ERROR {0} website response timed out, Time - {1} At line - {2}", wdte.Message, TimeStamp, i);
                         }
                         catch (NoSuchElementException nse)
                         {
                             warn_count++;
-                            Trace.TraceError("Warning {0} At line - {1}, Time - {2}", nse.Message, i, TimeStamp);
+                            Trace.TraceError("Warning {0} At line failed to login- {1}, Time - {2}", nse.Message, i, TimeStamp);
                             Console.ForegroundColor = ConsoleColor.Red;
                             Console.WriteLine("Account login failed");
                             Console.ResetColor();
@@ -363,6 +317,12 @@ namespace PandaButcher_2
                             err_count++;
                             Trace.TraceWarning("ERROR {0} Website did not respond, Time - {1} At line - {2}", wde.Message, TimeStamp, i);
                         }
+                        catch (Exception exp)
+                        {
+                            err_count++;
+                            Trace.TraceWarning("Unknown ERROR {0} Execution Result = {1}, Time - {2} At line - {3}", exp.Message, exp.HResult, TimeStamp, i);
+
+                        }
                         finally
                         {
                             stopWatch.Stop();
@@ -374,10 +334,6 @@ namespace PandaButcher_2
                         }
                     }
                 }
-                var psi = new ProcessStartInfo("shutdown", "/s /t 0");
-                psi.CreateNoWindow = true;
-                psi.UseShellExecute = false;
-                Process.Start(psi);
                 Console.WriteLine("Done. Total process = {0}, Total warning = {1}, Total Errors = {2}", count, warn_count, err_count);
                 Console.ReadKey();
             }
