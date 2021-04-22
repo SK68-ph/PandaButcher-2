@@ -37,6 +37,19 @@ namespace PandaButcher_2
                 pass = RandomNumber(233764, 203982320).ToString();
             }
 
+
+            public string[] genEmailNew(string baseEmail)
+            {
+                string[] email = new string[9999];
+                for (int i = 0; i < 9998; i++)
+                {
+                    email[i]= baseEmail + "+" + i + "@gmail.com";
+                }
+                rand();
+                string[] MyRandomArray = email.OrderBy(x => _random.Next()).ToArray();
+                return MyRandomArray;
+            }
+
             private string _email;
             private string _fname;
             private string _lname;
@@ -93,7 +106,7 @@ namespace PandaButcher_2
                     }
                     else
                     {
-                        Trace.TraceError("Invalid file");
+                        Console.WriteLine("Invalid file");
                         Environment.Exit(-1);
                     }
                 }));
@@ -121,7 +134,7 @@ namespace PandaButcher_2
                         }
                         else
                         {
-                            Trace.TraceError("Invalid file");
+                            Console.WriteLine("Invalid file");
                             Environment.Exit(-1);
                         }
                     }
@@ -148,25 +161,36 @@ namespace PandaButcher_2
         static void Main(string[] args)
         {
             Updater();
+            Account account = new Account();
+            Stopwatch stopWatch = new Stopwatch();
+            int count = 0;
+            int err_count = 0;
+            int warn_count = 0;
+            TimeStamp = DateTime.Now.ToString("MMMM-d-hh-mm-ss-tt");
             while (true)
             {
                 // Selection 
                 Console.Clear();
                 Console.WriteLine("Modes");
                 Console.WriteLine("1 = Register Account");
+                Console.WriteLine("1a = New method(+)");
                 Console.WriteLine("2 = Check Butcher");
                 Console.WriteLine("3 = Export Butcher");
                 Console.Write("Enter Mode :");
                 string selection = Console.ReadLine();
-               
-                Account account = new Account();
-                Stopwatch stopWatch = new Stopwatch();
                 
-                int count = 0;
-                int err_count = 0;
-                int warn_count = 0;
-                var lines = File.ReadAllLines(Data.GetDataFile());
-                TimeStamp = DateTime.Now.ToString("MMMM-d-hh-mm-ss");
+                string[] lines = { };
+                if (selection.Equals("1a"))
+                {
+                    Console.Write("Enter email:");
+                    var baseEmail = Console.ReadLine();
+                    lines = account.genEmailNew(baseEmail);
+                }
+                else if(selection.Equals("1") || selection.Equals("2") || selection.Equals("3"))
+                {
+                    lines = File.ReadAllLines(Data.GetDataFile());
+                }
+
                 for (var i = 0; i < lines.Length; i++)
                 {
                     string data = lines[i].Trim(' ');
@@ -198,7 +222,8 @@ namespace PandaButcher_2
                     }
                     ChromeOptions options = new ChromeOptions();
                     options.AddUserProfilePreference("profile.default_content_setting_values.images", 2);
-                    options.AddArguments("--guest", "--user-agent=" + Data.GetUserAgent(), "--disable-blink-features=AutomationControlled", "--blink-settings=imagesEnabled=false", "--disable-gpu", "--disable-software-rasterizer", "--disable-extensions", "--log-level=3");
+                    string curUserAgent = Data.GetUserAgent();
+                    options.AddArguments("--guest", "--headless", "--user-agent=" + curUserAgent, "--disable-blink-features=AutomationControlled", "--blink-settings=imagesEnabled=false", "--disable-gpu", "--disable-software-rasterizer", "--disable-extensions", "--log-level=3");
 
                     using (IWebDriver driver = new ChromeDriver(options))
                     {
@@ -222,7 +247,7 @@ namespace PandaButcher_2
                             if (selection.Equals("1"))
                             {
                                 account.rand();
-                                Console.WriteLine("Creating account - {0}", account.email);
+                                Console.WriteLine("Creating account - {0} with UAgent - {1}", account.email, curUserAgent);
                                 driver.FindElement(By.Name("first_name")).SendKeys(account.fname);
                                 Thread.Sleep(100);
                                 _ = driver.Manage().Timeouts().ImplicitWait;
@@ -235,9 +260,9 @@ namespace PandaButcher_2
                                 driver.FindElement(By.Name("password")).SendKeys(OpenQA.Selenium.Keys.Enter);
                                 Thread.Sleep(2000);
                                 _ = driver.Manage().Timeouts().ImplicitWait;
-                                if (driver.Url != "https://www.foodpanda.ph/")
+                                if (!driver.Url.Equals("https://www.foodpanda.ph/"))
                                 {
-                                    throw new WebDriverTimeoutException("Network Failure,Website failed to respond.");
+                                    throw new NoSuchElementException();
                                 }
                                 StreamWriter file = new StreamWriter(TimeStamp + "-GenAcc.txt", append: true);
                                 count++;
@@ -247,19 +272,23 @@ namespace PandaButcher_2
                             }
                             else if (selection.Equals("2"))
                             {
-                                Console.WriteLine("Checking account {0}", account.email);
+                                Console.WriteLine("Checking account {0} with UAgent - {1}", account.email , curUserAgent);
                                 driver.FindElement(By.Name("_password")).SendKeys(account.pass);
                                 Thread.Sleep(100);
                                 _ = driver.Manage().Timeouts().ImplicitWait;
                                 driver.FindElement(By.Name("_password")).SendKeys(OpenQA.Selenium.Keys.Enter);
                                 Thread.Sleep(2000);
                                 _ = driver.Manage().Timeouts().ImplicitWait;
-                                if (driver.Url != "https://www.foodpanda.ph/")
+                                if (!driver.Url.Equals("https://www.foodpanda.ph/"))
                                 {
-                                    throw new WebDriverTimeoutException("Network Failure,Website failed to respond.");
+                                    throw new NoSuchElementException();
                                 }
                                 driver.Navigate().GoToUrl("https://www.foodpanda.ph/vouchers");
                                 Thread.Sleep(1000);
+                                if (!driver.Url.Equals("https://www.foodpanda.ph/vouchers"))
+                                {
+                                    throw new NoSuchElementException();
+                                }
                                 _ = driver.Manage().Timeouts().ImplicitWait;
                                 IList<IWebElement> elements = driver.FindElements(By.XPath("//ul"));
                                 StreamWriter file = new StreamWriter(TimeStamp + "-CheckedAcc.txt", append: true);
@@ -286,7 +315,7 @@ namespace PandaButcher_2
                                 {
                                     warn_count++;
                                     Console.ForegroundColor = ConsoleColor.Red;
-                                    Trace.TraceError("Warning Account login failed At line - {0}, Time - {1}", i, TimeStamp);
+                                    Console.WriteLine("Warning Account login failed At line - {0}, Time - {1}", i, TimeStamp);
                                     Console.ResetColor();
                                 }
                                 file.Close();
@@ -296,32 +325,40 @@ namespace PandaButcher_2
                         catch (WebDriverTimeoutException wdte)
                         {
                             err_count++;
-                            Trace.TraceWarning("ERROR {0} website response timed out, Time - {1} At line - {2}", wdte.Message, TimeStamp, i);
+                            Console.WriteLine("ERROR {0} website response timed out, Time - {1} At line - {2}", wdte.Message, TimeStamp, i);
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine("Website not responding.");
+                            Console.ResetColor();
                         }
                         catch (NoSuchElementException nse)
                         {
                             warn_count++;
-                            Trace.TraceError("Warning {0} At line failed to login- {1}, Time - {2}", nse.Message, i, TimeStamp);
+                            Console.WriteLine("Warning {0} At line failed to login- {1}, Time - {2}", nse.Message, i, TimeStamp);
                             Console.ForegroundColor = ConsoleColor.Red;
-                            Console.WriteLine("Account login failed");
+                            Console.WriteLine("Account register/login failed");
                             Console.ResetColor();
 
                         }
                         catch (StaleElementReferenceException serf) 
                         {
                             err_count++;
-                            Trace.TraceWarning("FATAL ERROR {0} , Time - {1} At line - {2}", serf.Message, TimeStamp, i);
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine("FATAL ERROR {0} , Time - {1} At line - {2}", serf.Message, TimeStamp, i);
+                            Console.ResetColor();
                         }
                         catch (WebDriverException wde)
                         {
                             err_count++;
-                            Trace.TraceWarning("ERROR {0} Website did not respond, Time - {1} At line - {2}", wde.Message, TimeStamp, i);
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine("ERROR {0} Website did not respond, Time - {1} At line - {2}", wde.Message, TimeStamp, i);
+                            Console.ResetColor();
                         }
                         catch (Exception exp)
                         {
                             err_count++;
-                            Trace.TraceWarning("Unknown ERROR {0} Execution Result = {1}, Time - {2} At line - {3}", exp.Message, exp.HResult, TimeStamp, i);
-
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine("Unknown ERROR {0} Execution Result = {1}, Time - {2} At line - {3}", exp.Message, exp.HResult, TimeStamp, i);
+                            Console.ResetColor();
                         }
                         finally
                         {
