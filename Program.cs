@@ -45,7 +45,6 @@ namespace PandaButcher_2
                 {
                     email[i]= baseEmail + "+" + i + "@gmail.com";
                 }
-                rand();
                 string[] MyRandomArray = email.OrderBy(x => _random.Next()).ToArray();
                 return MyRandomArray;
             }
@@ -87,14 +86,14 @@ namespace PandaButcher_2
             }
         }
 
-        static class Data
+        class Data
         {
-            private static string[] useragent = { "Mozilla / 5.0(Windows NT 10.0; Win64; x64) AppleWebKit / 537.36(KHTML, like Gecko) Chrome / 90.0.4430.85 Safari / 537.36", "Mozilla / 5.0(Windows NT 10.0; WOW64) AppleWebKit / 537.36(KHTML, like Gecko) Chrome / 90.0.4430.85 Safari / 537.36", "Mozilla / 5.0(Windows NT 10.0) AppleWebKit / 537.36(KHTML, like Gecko) Chrome / 90.0.4430.85 Safari / 537.36", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4363.0 Safari/537.36", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36 FS", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36" };
-            public static string GetUserAgent()
+            private string[] useragent = { "Mozilla / 5.0(Windows NT 10.0; Win64; x64) AppleWebKit / 537.36(KHTML, like Gecko) Chrome / 90.0.4430.85 Safari / 537.36", "Mozilla / 5.0(Windows NT 10.0; WOW64) AppleWebKit / 537.36(KHTML, like Gecko) Chrome / 90.0.4430.85 Safari / 537.36", "Mozilla / 5.0(Windows NT 10.0) AppleWebKit / 537.36(KHTML, like Gecko) Chrome / 90.0.4430.85 Safari / 537.36", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4363.0 Safari/537.36", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36 FS", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36" };
+            public  string GetUserAgent()
             {
                 return useragent[RandomNumber(0,useragent.Length - 1)];
             }
-            public static string GetDataFile()
+            public  string GetDataFile()
             {
                 string dataFile = "";
                 Thread t = new Thread((ThreadStart)(() => {
@@ -116,9 +115,9 @@ namespace PandaButcher_2
                 return dataFile;
             }
 
-            private static string exportPath = "";
-            private static string exportName = "";
-            private static void GetExportPath()
+            private  string exportPath = "";
+            private  string exportName = "";
+            private  void GetExportPath()
             {
                 Thread t = new Thread(() =>
                 {
@@ -144,7 +143,7 @@ namespace PandaButcher_2
                 t.Join();
             }
 
-            public static void ExportData(string data)
+            public  void ExportData(string data)
             {
                 if (string.IsNullOrEmpty(exportPath) || string.IsNullOrEmpty(exportName))
                 {
@@ -161,14 +160,15 @@ namespace PandaButcher_2
         static void Main(string[] args)
         {
             Updater();
-            Account account = new Account();
-            Stopwatch stopWatch = new Stopwatch();
-            int count = 0;
-            int err_count = 0;
-            int warn_count = 0;
-            TimeStamp = DateTime.Now.ToString("MMMM-d-hh-mm-ss-tt");
             while (true)
             {
+                int count = 0;
+                int err_count = 0;
+                int warn_count = 0;
+                Account account = new Account();
+                Stopwatch stopWatch = new Stopwatch();
+                Data data1 = new Data();
+
                 // Selection 
                 Console.Clear();
                 Console.WriteLine("Modes");
@@ -178,7 +178,8 @@ namespace PandaButcher_2
                 Console.WriteLine("3 = Export Butcher");
                 Console.Write("Enter Mode :");
                 string selection = Console.ReadLine();
-                
+                TimeStamp = DateTime.Now.ToString("MMMM-d-hh-mm-ss-tt");
+
                 string[] lines = { };
                 if (selection.Equals("1a"))
                 {
@@ -188,7 +189,7 @@ namespace PandaButcher_2
                 }
                 else if(selection.Equals("1") || selection.Equals("2") || selection.Equals("3"))
                 {
-                    lines = File.ReadAllLines(Data.GetDataFile());
+                    lines = File.ReadAllLines(data1.GetDataFile());
                 }
 
                 for (var i = 0; i < lines.Length; i++)
@@ -201,28 +202,27 @@ namespace PandaButcher_2
 
                     if (data.Contains('#') || selection.Equals("3"))
                     {
-                        if (data.Contains("OK"))
+                        if (data.Contains("OK") && selection.Equals("3"))
                         {
                             account.SplitRaw(lines[i + 1]);
-                            Data.ExportData(account.Export());
+                            data1.ExportData(account.Export());
                             count++;
                             i++;
                         }
                         continue;
                     }
 
-                    if (selection.Equals("1"))
+                    if (selection.Equals("1") || selection.Equals("1a"))
                     {
                         account.email = data;
                     }
-
                     if (selection.Equals("2"))
                     {
                         account.SplitRaw(data);
                     }
                     ChromeOptions options = new ChromeOptions();
                     options.AddUserProfilePreference("profile.default_content_setting_values.images", 2);
-                    string curUserAgent = Data.GetUserAgent();
+                    string curUserAgent = data1.GetUserAgent();
                     options.AddArguments("--guest", "--headless", "--user-agent=" + curUserAgent, "--disable-blink-features=AutomationControlled", "--blink-settings=imagesEnabled=false", "--disable-gpu", "--disable-software-rasterizer", "--disable-extensions", "--log-level=3");
 
                     using (IWebDriver driver = new ChromeDriver(options))
@@ -244,7 +244,7 @@ namespace PandaButcher_2
                             driver.FindElement(By.Name("email")).SendKeys(account.email + OpenQA.Selenium.Keys.Enter);
                             Thread.Sleep(1000);
                             _ = driver.Manage().Timeouts().ImplicitWait;
-                            if (selection.Equals("1"))
+                            if (selection.Equals("1") || selection.Equals("1a"))
                             {
                                 account.rand();
                                 Console.WriteLine("Creating account - {0} with UAgent - {1}", account.email, curUserAgent);
