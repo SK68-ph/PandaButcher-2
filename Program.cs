@@ -40,10 +40,21 @@ namespace PandaButcher_2
 
             public string[] genEmailNew(string baseEmail)
             {
-                string[] email = new string[9999];
-                for (int i = 0; i < 9998; i++)
+                List<string> email = new List<string>();
+                for (int i = 0; i < 10000; i++)
                 {
-                    email[i]= baseEmail + "+" + i + "@gmail.com";
+                    email.Add(baseEmail + "+" + i + "@gmail.com");
+                }
+                string[] MyRandomArray = email.OrderBy(x => _random.Next()).ToArray();
+                return MyRandomArray;
+            }
+
+            public string[] genEmailNew(string baseEmail,int start, int end)
+            {
+                List<string> email = new List<string>();
+                for (int i = start; i < end; i++)
+                {
+                    email.Add(baseEmail + "+" + i + "@gmail.com");
                 }
                 string[] MyRandomArray = email.OrderBy(x => _random.Next()).ToArray();
                 return MyRandomArray;
@@ -93,15 +104,20 @@ namespace PandaButcher_2
             {
                 return useragent[RandomNumber(0,useragent.Length - 1)];
             }
-            public  string GetDataFile()
+
+            public string curGenPath = "";
+            public string curGenName = "";
+            public string GetDataFile()
             {
-                string dataFile = "";
-                Thread t = new Thread((ThreadStart)(() => {
+                    Thread t = new Thread((ThreadStart)(() => {
                     OpenFileDialog openFile = new OpenFileDialog();
+                    openFile.FileName = "Emails.txt";
                     openFile.Filter = "Text|*.txt|All|*.*";
                     if (openFile.ShowDialog() == DialogResult.OK)
                     {
-                        dataFile = openFile.FileName;
+                        curGenName = openFile.FileName;
+                        curGenPath = Directory.GetParent(curGenName).FullName;
+
                     }
                     else
                     {
@@ -112,7 +128,7 @@ namespace PandaButcher_2
                 t.SetApartmentState(ApartmentState.STA);
                 t.Start();
                 t.Join();
-                return dataFile;
+                return curGenName;
             }
 
             private  string exportPath = "";
@@ -185,7 +201,11 @@ namespace PandaButcher_2
                 {
                     Console.Write("Enter email:");
                     var baseEmail = Console.ReadLine();
-                    lines = account.genEmailNew(baseEmail);
+                    Console.Write("Enter Start Count:");
+                    var numStart = int.Parse( Console.ReadLine());
+                    Console.Write("Enter End Count:");
+                    var numEnd = int.Parse(Console.ReadLine());
+                    lines = account.genEmailNew(baseEmail,numStart,numEnd);
                 }
                 else if(selection.Equals("1") || selection.Equals("2") || selection.Equals("3"))
                 {
@@ -264,7 +284,7 @@ namespace PandaButcher_2
                                 {
                                     throw new NoSuchElementException();
                                 }
-                                StreamWriter file = new StreamWriter(TimeStamp + "-GenAcc.txt", append: true);
+                                StreamWriter file = new StreamWriter(Path.Combine(data1.curGenPath, TimeStamp + "-GenAcc.txt"), append: true);
                                 count++;
                                 file.WriteLine(account.ToString());
                                 file.Close();
@@ -291,7 +311,7 @@ namespace PandaButcher_2
                                 }
                                 _ = driver.Manage().Timeouts().ImplicitWait;
                                 IList<IWebElement> elements = driver.FindElements(By.XPath("//ul"));
-                                StreamWriter file = new StreamWriter(TimeStamp + "-CheckedAcc.txt", append: true);
+                                StreamWriter file = new StreamWriter(Path.Combine(data1.curGenPath, TimeStamp + "-CheckedAcc.txt") , append: true);
                                 if (elements.Count >= 5)
                                 {
                                     count++;
