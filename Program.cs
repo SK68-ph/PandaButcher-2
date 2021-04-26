@@ -243,7 +243,7 @@ namespace PandaButcher_2
                     ChromeOptions options = new ChromeOptions();
                     options.AddUserProfilePreference("profile.default_content_setting_values.images", 2);
                     string curUserAgent = data1.GetUserAgent();
-                    options.AddArguments("--guest", "--headless", "--user-agent=" + curUserAgent, "--disable-blink-features=AutomationControlled", "--blink-settings=imagesEnabled=false", "--disable-gpu", "--disable-software-rasterizer", "--disable-extensions", "--log-level=3");
+                    options.AddArguments("--guest", "--headless", "--disable-blink-features=AutomationControlled", "--blink-settings=imagesEnabled=false", "--disable-gpu", "--disable-software-rasterizer", "--disable-extensions", "--log-level=3");
 
                     using (IWebDriver driver = new ChromeDriver(options))
                     {
@@ -259,23 +259,23 @@ namespace PandaButcher_2
                             driver.FindElement(By.XPath("/html/body/div[1]/div[1]/main[1]/div[1]/div[1]/div[2]/button[1]")).Click();
                             Thread.Sleep(100);
                             wait.Until(webDriver => driver.FindElement(By.CssSelector("input")).Displayed);
-                            Thread.Sleep(100);
+                            Thread.Sleep(2000);
                             _ = driver.Manage().Timeouts().ImplicitWait;
                             driver.FindElement(By.Name("email")).SendKeys(account.email + OpenQA.Selenium.Keys.Enter);
-                            Thread.Sleep(1000);
+                            Thread.Sleep(2000);
                             _ = driver.Manage().Timeouts().ImplicitWait;
                             if (selection.Equals("1") || selection.Equals("1a"))
                             {
                                 account.rand();
                                 Console.WriteLine("Creating account - {0} with UAgent - {1}", account.email, curUserAgent);
                                 driver.FindElement(By.Name("first_name")).SendKeys(account.fname);
-                                Thread.Sleep(100);
+                                Thread.Sleep(2000);
                                 _ = driver.Manage().Timeouts().ImplicitWait;
                                 driver.FindElement(By.Name("last_name")).SendKeys(account.lname);
-                                Thread.Sleep(100);
+                                Thread.Sleep(2000);
                                 _ = driver.Manage().Timeouts().ImplicitWait;
                                 driver.FindElement(By.Name("password")).SendKeys(account.pass);
-                                Thread.Sleep(100);
+                                Thread.Sleep(2000);
                                 _ = driver.Manage().Timeouts().ImplicitWait;
                                 driver.FindElement(By.Name("password")).SendKeys(OpenQA.Selenium.Keys.Enter);
                                 Thread.Sleep(2000);
@@ -294,7 +294,7 @@ namespace PandaButcher_2
                             {
                                 Console.WriteLine("Checking account {0} with UAgent - {1}", account.email , curUserAgent);
                                 driver.FindElement(By.Name("_password")).SendKeys(account.pass);
-                                Thread.Sleep(100);
+                                Thread.Sleep(2000);
                                 _ = driver.Manage().Timeouts().ImplicitWait;
                                 driver.FindElement(By.Name("_password")).SendKeys(OpenQA.Selenium.Keys.Enter);
                                 Thread.Sleep(2000);
