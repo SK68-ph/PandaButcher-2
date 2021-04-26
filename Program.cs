@@ -310,22 +310,31 @@ namespace PandaButcher_2
                                     throw new NoSuchElementException();
                                 }
                                 _ = driver.Manage().Timeouts().ImplicitWait;
-                                IList<IWebElement> elements = driver.FindElements(By.XPath("//ul"));
+                                IList<IWebElement> elements = driver.FindElements(By.XPath("/html/body/div[13]/div[1]/main/section/div/div/div[1]/ul/li"));
                                 StreamWriter file = new StreamWriter(Path.Combine(data1.curGenPath, TimeStamp + "-CheckedAcc.txt") , append: true);
-                                if (elements.Count >= 5)
+                                if (elements.Count >= 2)
                                 {
                                     count++;
-                                    file.WriteLine("#Status - " + "OK");
+                                    file.WriteLine("#Status - OK, Butcher Count = " + elements.Count);
                                     file.WriteLine(account.ToString());
                                     Console.ForegroundColor = ConsoleColor.Green;
                                     Console.WriteLine("Done - Status = " + " OK");
                                     Console.ResetColor();
                                 }
-                                else if (elements.Count == 4)
+                                if (elements.Count == 1)
+                                {
+                                    count++;
+                                    file.WriteLine("#Status - OK");
+                                    file.WriteLine(account.ToString());
+                                    Console.ForegroundColor = ConsoleColor.Green;
+                                    Console.WriteLine("Done - Status = " + " OK");
+                                    Console.ResetColor();
+                                }
+                                else if (elements.Count == 0)
                                 {
 
                                     count++;
-                                    file.WriteLine("#Status - " + "NULL");
+                                    file.WriteLine("#Status - NULL");
                                     file.WriteLine(account.ToString());
                                     Console.ForegroundColor = ConsoleColor.Red;
                                     Console.WriteLine("Done - Status = " + "NULL");
