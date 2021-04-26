@@ -241,6 +241,11 @@ namespace PandaButcher_2
                         account.SplitRaw(data);
                     }
                     ChromeOptions options = new ChromeOptions();
+                    if (!File.Exists(@"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"))
+                    {
+                        Console.WriteLine("Brave browser not found");
+                        Environment.Exit(-1);
+                    }
                     options.BinaryLocation = @"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe";
                     options.AddUserProfilePreference("profile.default_content_setting_values.images", 2);
                     string curUserAgent = data1.GetUserAgent();
