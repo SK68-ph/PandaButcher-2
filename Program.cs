@@ -241,9 +241,10 @@ namespace PandaButcher_2
                         account.SplitRaw(data);
                     }
                     ChromeOptions options = new ChromeOptions();
+                    options.BinaryLocation = @"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe";
                     options.AddUserProfilePreference("profile.default_content_setting_values.images", 2);
                     string curUserAgent = data1.GetUserAgent();
-                    options.AddArguments("--guest", "--headless", "--disable-blink-features=AutomationControlled", "--blink-settings=imagesEnabled=false", "--disable-gpu", "--disable-software-rasterizer", "--disable-extensions", "--log-level=3");
+                    options.AddArguments("--incognito", "--user-agent=" + curUserAgent, "--disable-blink-features=AutomationControlled" , "--headless", "--disable-extensions", "--blink-settings=imagesEnabled=false", "--disable-gpu", "--disable-software-rasterizer", "--disable-extensions", "--log-level=3");
 
                     using (IWebDriver driver = new ChromeDriver(options))
                     {
@@ -278,11 +279,12 @@ namespace PandaButcher_2
                                 Thread.Sleep(2000);
                                 _ = driver.Manage().Timeouts().ImplicitWait;
                                 driver.FindElement(By.Name("password")).SendKeys(OpenQA.Selenium.Keys.Enter);
-                                Thread.Sleep(2000);
+                                Thread.Sleep(1000);
                                 _ = driver.Manage().Timeouts().ImplicitWait;
+                                Thread.Sleep(3000);
                                 if (!driver.Url.Equals("https://www.foodpanda.ph/"))
                                 {
-                                    throw new NoSuchElementException();
+                                    throw new NoSuchElementException("Error failed to register account - " + account.email);
                                 }
                                 StreamWriter file = new StreamWriter(Path.Combine(data1.curGenPath, TimeStamp + "-GenAcc.txt"), append: true);
                                 count++;
@@ -304,7 +306,6 @@ namespace PandaButcher_2
                                     throw new NoSuchElementException();
                                 }
                                 driver.Navigate().GoToUrl("https://www.foodpanda.ph/vouchers");
-                                Thread.Sleep(1000);
                                 if (!driver.Url.Equals("https://www.foodpanda.ph/vouchers"))
                                 {
                                     throw new NoSuchElementException();
