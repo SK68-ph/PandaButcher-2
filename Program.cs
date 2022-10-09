@@ -241,15 +241,15 @@ namespace PandaButcher_2
                         account.SplitRaw(data);
                     }
                     ChromeOptions options = new ChromeOptions();
-                    if (!File.Exists(@"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"))
+                    if (!File.Exists(@"C:\Users\Administrator\AppData\Local\Chromium\Application\chrome.exe"))
                     {
                         Console.WriteLine("Brave browser not found");
                         Environment.Exit(-1);
                     }
-                    options.BinaryLocation = @"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe";
+                    options.BinaryLocation = @"C:\Users\Administrator\AppData\Local\Chromium\Application\chrome.exe";
                     options.AddUserProfilePreference("profile.default_content_setting_values.images", 2);
                     string curUserAgent = data1.GetUserAgent();
-                    options.AddArguments("--incognito", "--user-agent=" + curUserAgent, "--disable-blink-features=AutomationControlled" , "--headless", "--disable-extensions", "--blink-settings=imagesEnabled=false", "--disable-gpu", "--disable-software-rasterizer", "--disable-extensions", "--log-level=3");
+                    options.AddArguments("--guest", "--user-agent=" + curUserAgent, "--headless","--disable-blink-features=AutomationControlled" , "--blink-settings=imagesEnabled=false", "--disable-gpu", "--disable-software-rasterizer", "--disable-extensions", "--log-level=3");
 
                     using (IWebDriver driver = new ChromeDriver(options))
                     {
